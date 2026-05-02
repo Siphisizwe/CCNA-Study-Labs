@@ -1,12 +1,31 @@
-# CCNA Study Labs
+# CCNA Study Labs — Siphisizwe Hlatshwayo
 
-Documenting my CCNA 200-301 study journey through 
-hands-on labs in Packet Tracer and GNS3.
+Self-studying CCNA 200-301 and building toward 
+a career in cybersecurity. Documenting every lab 
+with configs, notes and topology screenshots.
 
 ## Labs Completed
 - Lab 15 - VLSM Subnetting
 - Lab 16 - VLANs Part 1
+- Lab 17 - VLANs Part 2 (Trunking)
+- Lab 18 - Multilayer Switching
 
-## About
-Self-studying networking and cybersecurity from zero.
-Following Jeremy's IT Lab CCNA course.
+## Skills Building
+- Subnetting and VLSM
+- VLANs and Trunking
+- Static Routing
+- Router on a Stick
+- Multilayer Switching and SVIs
+
+## Tools
+- Cisco Packet Tracer
+
+
+## Certifications Targeting
+- CCNA 200-301 
+- CompTIA Security+ 
+- eJPT 
+- OSCP 
+
+## Connect
+LinkedIn: your linkedin URL here
