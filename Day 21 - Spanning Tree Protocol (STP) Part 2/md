@@ -1,0 +1,116 @@
+Day 21 - Spanning Tree Protocol (STP) Part 2
+
+Jeremy's IT Lab | CCNA 200-301 Complete Course
+
+Topics Covered
+
+STP port states (review + deep dive)
+STP timers
+PVST+ (Cisco's version of STP)
+STP configuration commands
+STP Toolkit: PortFast, BPDU Guard, BPDU Filter, Root Guard, Loop Guard
+STP load balancing
+
+
+STP Port States (Review)
+StateForwards Frames?Learns MACs?Receives BPDUs?BlockingNoNoYesListeningNoNoYesLearningNoYesYesForwardingYesYesYesDisabledNoNoNo
+A port takes ~50 seconds to go from Blocking to Forwarding (Max Age 20s + Listening 15s + Learning 15s)
+
+PVST+ — Cisco's STP Version
+
+Cisco switches run PVST+ (Per-VLAN Spanning Tree Plus) by default
+Runs a separate STP instance for each VLAN
+Allows different Root Bridges per VLAN for load balancing
+Modern switches default to Rapid-PVST+ (Day 22)
+
+STP mode commands:
+spanning-tree mode pvst          ! Classic 802.1D per VLAN
+spanning-tree mode rapid-pvst    ! Rapid STP — default on modern switches
+
+STP Configuration Commands
+Configuring the Root Bridge:
+spanning-tree vlan 1 priority 4096        ! Manual (must be multiple of 4096)
+spanning-tree vlan 1 root primary         ! Macro: sets to 24576 or lower
+spanning-tree vlan 1 root secondary       ! Sets priority to 28672
+Port cost and priority:
+interface g0/1
+  spanning-tree vlan 1 cost 10
+  spanning-tree vlan 1 port-priority 64
+Verification:
+show spanning-tree
+show spanning-tree vlan 1
+show spanning-tree interface g0/1 detail
+
+STP Load Balancing
+! SW1: Root for VLAN 1, secondary for VLAN 2
+spanning-tree vlan 1 root primary
+spanning-tree vlan 2 root secondary
+
+! SW2: Root for VLAN 2, secondary for VLAN 1
+spanning-tree vlan 2 root primary
+spanning-tree vlan 1 root secondary
+
+STP Toolkit
+1. PortFast
+Bypasses Listening and Learning — port goes directly to Forwarding.
+Use on access ports connected to end hosts. NEVER on switch-to-switch ports.
+interface g0/1
+  spanning-tree portfast
+
+spanning-tree portfast default   ! Enable globally on all access ports
+2. BPDU Guard
+Shuts port into err-disabled if a BPDU is received on a PortFast port.
+Always pair with PortFast.
+interface g0/1
+  spanning-tree bpduguard enable
+
+spanning-tree portfast bpduguard default   ! Enable globally
+
+errdisable recovery cause bpduguard        ! Auto-recover
+errdisable recovery interval 30
+3. BPDU Filter
+Stops a port from sending or receiving BPDUs. Use carefully — can cause loops.
+spanning-tree portfast bpdufilter default  ! Global (safer)
+
+interface g0/1
+  spanning-tree bpdufilter enable          ! Per-interface (disables STP — dangerous)
+4. Root Guard
+Blocks port (root-inconsistent) if a superior BPDU is received.
+Use on Designated Ports facing downstream switches.
+interface g0/1
+  spanning-tree guard root
+5. Loop Guard
+Blocks port (loop-inconsistent) if BPDUs stop being received.
+Auto-recovers when BPDUs resume. Use on Root Ports and Non-Designated Ports.
+interface g0/1
+  spanning-tree guard loop
+
+spanning-tree loopguard default   ! Enable globally
+
+STP Toolkit Summary
+FeatureProtects AgainstPort ActionWhere to UsePortFastSlow convergenceSkips Listening/LearningAccess ports (end hosts)BPDU GuardRogue switches on access portserr-disabledPortFast portsBPDU FilterSending/receiving BPDUsStops BPDU processingAccess ports (carefully)Root GuardUnauthorized Root Bridgeroot-inconsistentDesignated ports facing downstreamLoop GuardUnidirectional link failureloop-inconsistentRoot Ports / Non-Designated Ports
+
+Full Configuration Example
+spanning-tree vlan 1 root primary
+spanning-tree portfast default
+spanning-tree portfast bpduguard default
+spanning-tree loopguard default
+
+interface g0/2
+  spanning-tree guard root
+
+show spanning-tree
+show spanning-tree vlan 1
+show spanning-tree interface g0/1 detail
+
+Key Terms
+
+PVST+ = Per-VLAN Spanning Tree Plus, Cisco default, one instance per VLAN
+PortFast = Skips Listening and Learning, straight to Forwarding
+BPDU Guard = err-disabled if BPDU received on PortFast port
+BPDU Filter = Stops port from sending/receiving BPDUs
+Root Guard = Blocks port if superior BPDU received (prevents rogue root)
+Loop Guard = Blocks port if BPDUs stop being received, auto-recovers
+err-disabled = Port shutdown by security feature, manually re-enable
+root-inconsistent = Port blocked by Root Guard
+loop-inconsistent = Port blocked by Loop Guard, auto-recovers
